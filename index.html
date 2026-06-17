@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보솜패드 채널 매출 & 가격 시뮬레이터</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root{--bg:#f3f4f6;--card:#fff;--dark:#111827;--sub:#6b7280;--border:#e5e7eb;--accent:#2563eb;--red:#ef4444;--green:#22c55e;--amber:#f59e0b;--navy:#1e293b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--dark);line-height:1.5;}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 24px 40px;}
+  .header{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:14px;padding:28px 32px;margin-bottom:24px;}
+  .header h1{font-size:20px;font-weight:700;}
+  .header .sub{font-size:12px;color:#94a3b8;margin-top:4px;}
+  .section{background:var(--card);border-radius:12px;padding:24px 28px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .section-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .num{background:var(--navy);color:#fff;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .chart-box{position:relative;height:260px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{text-align:right;padding:8px 10px;font-weight:600;color:var(--sub);font-size:11px;border-bottom:2px solid var(--border);white-space:nowrap;}
+  thead th:first-child{text-align:left;}
+  tbody td{text-align:right;padding:8px 10px;border-bottom:1px solid #f3f4f6;}
+  tbody td:first-child{text-align:left;font-weight:600;color:#374151;}
+  .red{color:var(--red);font-weight:700;}.blue{color:var(--accent);font-weight:700;}.green{color:var(--green);font-weight:700;}.amber{color:var(--amber);font-weight:700;}.bold{font-weight:700;}
+  .ctrl-group{margin-bottom:16px;}
+  .ctrl-label{font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;}
+  .sim-controls{display:flex;gap:8px;flex-wrap:wrap;}
+  .sim-btn{padding:7px 14px;border:2px solid var(--border);border-radius:8px;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .sim-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .sim-btn.active{border-color:var(--accent);background:var(--accent);color:#fff;}
+  .vol-btn{padding:7px 14px;border:2px solid var(--border);border-radius:8px;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .vol-btn:hover{border-color:var(--green);color:var(--green);}
+  .vol-btn.active{border-color:var(--green);background:var(--green);color:#fff;}
+  .sim-result{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+  .sim-card{padding:14px;border-radius:10px;text-align:center;}
+  .sim-card .label{font-size:10.5px;color:var(--sub);margin-bottom:4px;line-height:1.3;}
+  .sim-card .val{font-size:18px;font-weight:700;}
+  .sim-card .sub{font-size:10.5px;margin-top:2px;color:#9ca3af;}
+  .sim-card.neg{background:#fef2f2;}.sim-card.pos{background:#f0fdf4;}.sim-card.target{background:#eff6ff;}.sim-card.warn{background:#fffbeb;}
+  .cm-waterfall{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
+  .wf-item{text-align:center;}
+  .wf-bar-wrap{height:120px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px;}
+  .wf-bar{width:56px;border-radius:4px 4px 0 0;}
+  .wf-val{font-size:11px;font-weight:700;margin-bottom:4px;}
+  .wf-label{font-size:11px;color:var(--sub);}
+  .insight{background:#fffbeb;border-left:4px solid var(--amber);border-radius:0 8px 8px 0;padding:14px 18px;font-size:12.5px;color:#92400e;line-height:1.7;margin-top:16px;}
+  .insight strong{color:#78350f;}
+  .evidence{background:#f0fdf4;border-left:4px solid var(--green);border-radius:0 8px 8px 0;padding:14px 18px;font-size:12.5px;color:#166534;line-height:1.7;margin-top:16px;}
+  .evidence strong{color:#14532d;}
+  .scenario-tbl thead th{background:#f8fafc;position:sticky;top:0;}
+  .scenario-tbl .hl td{background:#fef3c7;font-weight:700;}
+  .scenario-tbl .breakeven td{background:#f0fdf4;}
+  .divider{border:none;border-top:1px dashed #e5e7eb;margin:20px 0;}
+  .footer{text-align:center;font-size:11px;color:#9ca3af;margin-top:12px;padding:10px;}
+  .risk-gauge{display:flex;align-items:center;gap:16px;padding:16px 20px;background:#f0fdf4;border-radius:10px;margin-top:16px;}
+  .risk-gauge .meter{flex:1;height:12px;background:#e5e7eb;border-radius:6px;overflow:hidden;position:relative;}
+  .risk-gauge .meter .fill{height:100%;border-radius:6px;transition:width .5s;}
+  .risk-gauge .verdict{font-size:14px;font-weight:700;white-space:nowrap;}
+  .n-badge{display:inline-block;background:#22c55e;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;}
+  .kpi-row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0;}
+  .kpi-sm{background:#f8fafc;border-radius:10px;padding:14px 16px;text-align:center;}
+  .kpi-sm .label{font-size:11px;color:var(--sub);margin-bottom:4px;}
+  .kpi-sm .val{font-size:20px;font-weight:700;}
+  .kpi-sm .sub{font-size:10.5px;color:var(--sub);margin-top:2px;}
+  @media(max-width:768px){.grid-2,.sim-result,.kpi-row-4{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <h1>보솜패드 채널 매출 분석 & 가격 조정 시뮬레이터</h1>
+  <div class="sub">데이터: 2026년 1~6월 (6월 MTD) · 분석 기준: 5월 · 자사몰 현재가: 기본형 44,900 / 라이트 49,900</div>
+</div>
+
+<!-- ===== 1. 채널 비중 ===== -->
+<div class="section">
+  <div class="section-title"><span class="num">1</span> 보솜패드 매출 채널 비중</div>
+  <div class="grid-2">
+    <div><div class="chart-box"><canvas id="c1stack"></canvas></div></div>
+    <div><div class="chart-box"><canvas id="c1pie"></canvas></div><p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:6px;">1~6월 누계</p></div>
+  </div>
+  <table style="margin-top:16px;">
+    <thead><tr><th>채널</th><th>1월</th><th>2월</th><th>3월</th><th>4월</th><th>5월</th><th>6월</th><th>누계</th><th>비중</th></tr></thead>
+    <tbody>
+      <tr><td>자사몰</td><td>25.0M</td><td>16.6M</td><td>21.9M</td><td>15.1M</td><td>15.1M</td><td>9.7M</td><td>103.3M</td><td class="blue">13.7%</td></tr>
+      <tr><td>스스</td><td>58.9M</td><td>52.1M</td><td>71.2M</td><td>46.8M</td><td>48.2M</td><td>26.7M</td><td>303.9M</td><td class="blue">40.4%</td></tr>
+      <tr><td>쿠팡</td><td>10.6M</td><td>126.0M</td><td>126.1M</td><td>0</td><td>43.2M</td><td>38.8M</td><td>344.6M</td><td class="blue">45.8%</td></tr>
+      <tr style="font-weight:700;border-top:2px solid #e5e7eb;"><td>합계</td><td>94.5M</td><td>194.6M</td><td>219.2M</td><td>61.9M</td><td>106.4M</td><td>75.2M</td><td>751.8M</td><td>100%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 2. 채널 내 비중 ===== -->
+<div class="section">
+  <div class="section-title"><span class="num">2</span> 각 채널 내 보솜패드 매출 비중</div>
+  <div class="grid-2">
+    <div><div class="chart-box"><canvas id="c2share"></canvas></div></div>
+    <div>
+      <table style="margin-top:8px;">
+        <thead><tr><th>채널</th><th>1월</th><th>2월</th><th>3월</th><th>4월</th><th>5월</th><th>6월</th></tr></thead>
+        <tbody>
+          <tr><td>자사몰</td><td>12.9%</td><td>10.1%</td><td>11.4%</td><td>8.7%</td><td>9.6%</td><td>7.8%</td></tr>
+          <tr><td>스스</td><td>14.9%</td><td>21.5%</td><td>24.4%</td><td>12.5%</td><td>15.4%</td><td>16.1%</td></tr>
+          <tr><td>쿠팡</td><td>20.4%</td><td>62.5%</td><td>51.3%</td><td>0.0%</td><td>29.7%</td><td>44.0%</td></tr>
+        </tbody>
+      </table>
+      <div class="insight" style="margin-top:14px;">
+        <strong>자사몰</strong> 8~13% 안정적이나 하락 추세.
+        <strong>쿠팡</strong> 0~62% 변동 극심, 프로모션 의존.
+        <strong>스스</strong> 12~24% 중간 안정성.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3. 스스 카니발라이제이션 리스크 ===== -->
+<div class="section">
+  <div class="section-title"><span class="num">3</span> 스스 카니발라이제이션 리스크 — N배송 비중 분석</div>
+  <p style="font-size:12.5px;color:#6b7280;margin-bottom:16px;">자사몰 가격 인하 시 스스 매출 잠식 우려에 대한 검증. 스스 보솜패드의 배송구분별 매출 비중을 분석합니다.</p>
+
+  <div class="kpi-row-4">
+    <div class="kpi-sm">
+      <div class="label">스스 N배송 비중 (5월)</div>
+      <div class="val green">95.5%</div>
+      <div class="sub">45.97M / 48.15M</div>
+    </div>
+    <div class="kpi-sm">
+      <div class="label">스스 일반배송 비중 (5월)</div>
+      <div class="val" style="color:#9ca3af;">4.5%</div>
+      <div class="sub">2.19M / 48.15M</div>
+    </div>
+    <div class="kpi-sm">
+      <div class="label">6개월 평균 N배송 비중</div>
+      <div class="val green">94.3%</div>
+      <div class="sub">286.4M / 303.9M</div>
+    </div>
+    <div class="kpi-sm">
+      <div class="label">최대 카니발 노출액 (5월)</div>
+      <div class="val amber">2.19M</div>
+      <div class="sub">일반배송분만 리스크</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div><div class="chart-box"><canvas id="c3nship"></canvas></div></div>
+    <div>
+      <table>
+        <thead><tr><th>SKU / 배송</th><th>1월</th><th>2월</th><th>3월</th><th>4월</th><th>5월</th><th>6월</th></tr></thead>
+        <tbody>
+          <tr><td colspan="7" style="font-size:11px;color:var(--accent);font-weight:700;padding-top:10px;">보솜패드 기본형</td></tr>
+          <tr><td style="padding-left:16px;">N배송</td><td>32.9M</td><td>29.2M</td><td>42.2M</td><td>27.2M</td><td>26.9M</td><td>16.7M</td></tr>
+          <tr><td style="padding-left:16px;color:#9ca3af;">일반</td><td style="color:#9ca3af;">1.7M</td><td style="color:#9ca3af;">1.3M</td><td style="color:#9ca3af;">1.2M</td><td style="color:#9ca3af;">1.0M</td><td style="color:#9ca3af;">1.5M</td><td style="color:#9ca3af;">0.2M</td></tr>
+          <tr><td style="padding-left:16px;font-size:11px;color:var(--green);">N배송 비중</td><td class="green">95.2%</td><td class="green">95.8%</td><td class="green">97.3%</td><td class="green">96.5%</td><td class="green">94.8%</td><td class="green">98.8%</td></tr>
+          <tr><td colspan="7" style="font-size:11px;color:var(--accent);font-weight:700;padding-top:10px;">보솜패드 라이트</td></tr>
+          <tr><td style="padding-left:16px;">N배송</td><td>21.0M</td><td>19.6M</td><td>25.5M</td><td>16.9M</td><td>19.1M</td><td>9.3M</td></tr>
+          <tr><td style="padding-left:16px;color:#9ca3af;">일반</td><td style="color:#9ca3af;">3.4M</td><td style="color:#9ca3af;">2.0M</td><td style="color:#9ca3af;">2.4M</td><td style="color:#9ca3af;">1.8M</td><td style="color:#9ca3af;">0.7M</td><td style="color:#9ca3af;">0.5M</td></tr>
+          <tr><td style="padding-left:16px;font-size:11px;color:var(--green);">N배송 비중</td><td class="green">86.0%</td><td class="green">90.9%</td><td class="green">91.5%</td><td class="green">90.5%</td><td class="green">96.4%</td><td class="green">95.2%</td></tr>
+          <tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td>합산 N배송 비중</td><td class="green">91.4%</td><td class="green">93.8%</td><td class="green">95.0%</td><td class="green">94.1%</td><td class="green">95.5%</td><td class="green">97.4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Risk Gauge -->
+  <div class="risk-gauge">
+    <div class="verdict" style="color:var(--green);">LOW RISK</div>
+    <div class="meter">
+      <div class="fill" style="width:5.5%;background:linear-gradient(90deg,#22c55e,#86efac);"></div>
+    </div>
+    <div style="font-size:12px;color:var(--sub);">카니발 노출 비중 <strong style="color:var(--dark);">4.5%</strong></div>
+  </div>
+
+  <div class="evidence">
+    <strong>카니발라이제이션 우려가 낮은 3가지 근거:</strong><br>
+    <strong>1) 고객층 분리:</strong> 스스 보솜 매출의 <strong>94~97%가 N배송</strong>. N배송 고객은 네이버 쇼핑 생태계(적립, 빠른배송, 멤버십)에 락인된 별도 고객풀로, 자사몰 가격 변동에 반응할 가능성이 극히 낮음.<br>
+    <strong>2) 가격 비교 노출 제한:</strong> N배송 고객은 네이버 쇼핑 내에서 구매를 완결하므로, 자사몰 가격과 직접 비교하는 접점 자체가 없음.<br>
+    <strong>3) 최대 리스크 한정:</strong> 자사몰과 고객 겹침 가능성이 있는 "일반배송" 매출은 5월 기준 <strong>2.19M (4.5%)</strong>에 불과. 이 전액이 이탈하더라도 스스 영향은 미미하며, 해당 매출은 자사몰로 이전될 뿐 전사 매출은 유지됨.
+  </div>
+</div>
+
+<!-- ===== 4. CM 구조 ===== -->
+<div class="section">
+  <div class="section-title"><span class="num">4</span> 자사몰 보솜패드 공헌이익 구조 (5월)</div>
+  <div class="grid-2">
+    <div>
+      <div style="text-align:center;font-size:12px;color:#6b7280;margin-bottom:8px;">매출 → 비용 → CM 워터폴</div>
+      <div class="cm-waterfall">
+        <div class="wf-item"><div class="wf-val" style="color:var(--accent);">15,137,512</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:100%;background:#93c5fd;"></div></div><div class="wf-label">매출</div></div>
+        <div class="wf-item"><div class="wf-val" style="color:var(--red);">−8,709,037</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:57.5%;background:#fca5a5;"></div></div><div class="wf-label">원가 (57.5%)</div></div>
+        <div class="wf-item"><div class="wf-val" style="color:var(--amber);">−5,234,329</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:34.6%;background:#fde68a;"></div></div><div class="wf-label">변동비 (34.6%)</div></div>
+        <div class="wf-item"><div class="wf-val" style="color:var(--green);">1,194,146</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:7.9%;background:#86efac;"></div></div><div class="wf-label">CM (7.9%)</div></div>
+      </div>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>항목</th><th>기본형 (44,900)</th><th>라이트 (49,900)</th><th>합계</th></tr></thead>
+        <tbody>
+          <tr><td>월 수량</td><td>203개</td><td>121개</td><td>324개</td></tr>
+          <tr><td>월 매출</td><td>9,119,305</td><td>6,018,207</td><td>15,137,512</td></tr>
+          <tr><td>원가</td><td>5,136,428</td><td>3,572,609</td><td>8,709,037</td></tr>
+          <tr><td>변동비</td><td>3,153,595</td><td>2,080,734</td><td>5,234,329</td></tr>
+          <tr style="border-top:2px solid #e5e7eb;"><td class="bold">공헌이익</td><td class="green bold">829,282</td><td class="green bold">364,864</td><td class="green bold">1,194,146</td></tr>
+          <tr><td>CM/개</td><td class="bold">4,085원</td><td class="bold">3,016원</td><td>—</td></tr>
+          <tr><td>CM률</td><td>9.1%</td><td>6.1%</td><td>7.9%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div><div style="font-size:12px;color:#6b7280;margin:16px 0 8px;">월별 자사몰 보솜 공헌이익 추이</div><div class="chart-box" style="height:180px;"><canvas id="c4cm"></canvas></div></div>
+</div>
+
+<!-- ===== 5. 시뮬레이터 ===== -->
+<div class="section">
+  <div class="section-title"><span class="num">5</span> 가격 조정 시뮬레이터</div>
+  <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">인하 폭과 예상 수량 증가율을 선택하면 추가 확보 매출·순 CM 변동이 실시간 계산됩니다.</p>
+  <div class="ctrl-group">
+    <div class="ctrl-label">인하 폭</div>
+    <div class="sim-controls" id="priceBtns">
+      <button class="sim-btn" data-d="0">현행</button>
+      <button class="sim-btn" data-d="500">−500</button>
+      <button class="sim-btn" data-d="1000">−1,000</button>
+      <button class="sim-btn" data-d="1500">−1,500</button>
+      <button class="sim-btn active" data-d="2000">−2,000</button>
+      <button class="sim-btn" data-d="2500">−2,500</button>
+      <button class="sim-btn" data-d="3000">−3,000</button>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-label">예상 수량 증가율</div>
+    <div class="sim-controls" id="volBtns">
+      <button class="vol-btn" data-v="0">0%</button>
+      <button class="vol-btn" data-v="5">+5%</button>
+      <button class="vol-btn active" data-v="10">+10%</button>
+      <button class="vol-btn" data-v="15">+15%</button>
+      <button class="vol-btn" data-v="20">+20%</button>
+      <button class="vol-btn" data-v="30">+30%</button>
+      <button class="vol-btn" data-v="50">+50%</button>
+    </div>
+  </div>
+  <div class="sim-result" id="simCards"></div>
+  <div class="grid-2">
+    <div><table id="simDetail"><thead><tr><th>항목</th><th>기본형</th><th>라이트</th><th>합계</th></tr></thead><tbody></tbody></table></div>
+    <div><div class="chart-box" style="height:260px;"><canvas id="c5sim"></canvas></div></div>
+  </div>
+  <hr class="divider">
+  <div style="margin-top:4px;">
+    <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;">전체 시나리오 비교표 <span id="scenarioVolLabel" style="font-size:11px;color:var(--green);font-weight:600;"></span></div>
+    <div style="overflow-x:auto;">
+    <table class="scenario-tbl" id="scenarioTbl">
+      <thead><tr><th>인하폭</th><th>기본형</th><th>라이트</th><th>예상 수량</th><th>예상 매출</th><th>추가 확보 매출</th><th>예상 CM</th><th>순 CM 변동</th><th>CM 회수율</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+  </div>
+  <hr class="divider">
+  <div style="margin-top:4px;">
+    <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;">손익분기 수량 증가율 (CM 유지 최소선)</div>
+    <div class="chart-box" style="height:220px;"><canvas id="c5be"></canvas></div>
+  </div>
+  <div class="insight" id="simInsight"></div>
+</div>
+
+<div class="footer">바잇미 자사몰 · 보솜패드 가격 시뮬레이션 · 2026-06-17</div>
+</div>
+
+<script>
+const M=['1월','2월','3월','4월','5월','6월'];
+const bosom={자사몰:[24977899,16561065,21934687,15050709,15137512,9656642],스스:[58949433,52109435,71161886,46847545,48153779,26679838],쿠팡:[10562184,125975836,126108131,0,43155556,38819129]};
+const chT={자사몰:[193906962,163508220,192192805,173504189,158294366,124330466],스스:[396679411,242709234,291962380,374029021,313109583,166062157],쿠팡:[51845191,201724233,245761471,45261827,145420088,88157524]};
+const cmD={g:[1828684,819017,1516709,998652,829282],r:[320695,-52865,565565,336864,364864]};
+
+// N배송 data
+const nShip={
+  gN:[32907354,29223817,42161505,27218249,26895617,16704667],
+  gG:[1668870,1285973,1150243,979373,1463115,209891],
+  rN:[20966101,19636014,25475815,16884558,19073228,9292689],
+  rG:[3407108,1963631,2374323,1765365,721819,472591]
+};
+const nTotal=nShip.gN.map((v,i)=>v+nShip.rN[i]);
+const gTotal=nShip.gG.map((v,i)=>v+nShip.rG[i]);
+const allTotal=nTotal.map((v,i)=>v+gTotal[i]);
+const nPct=nTotal.map((v,i)=>v/allTotal[i]*100);
+
+const S={g:{price:44900,qty:203,cm:4085},r:{price:49900,qty:121,cm:3016},totalQty:324,vc:0.3458,totalCM:1194146,totalRev:15137512};
+const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+const fmtM=n=>(n/1e6).toFixed(1)+'M';
+const fmtPct=n=>(n>=0?'+':'')+n.toFixed(1)+'%';
+
+// ===== Chart 1: Stack =====
+new Chart(document.getElementById('c1stack'),{type:'bar',data:{labels:M,datasets:[
+  {label:'자사몰',data:bosom.자사몰,backgroundColor:'#3b82f6',borderRadius:2},
+  {label:'스스',data:bosom.스스,backgroundColor:'#f59e0b',borderRadius:2},
+  {label:'쿠팡',data:bosom.쿠팡,backgroundColor:'#ef4444',borderRadius:2}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'월별 보솜패드 매출 (채널별)',font:{size:13}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'}}}}});
+
+// Pie
+const cum={};['자사몰','스스','쿠팡'].forEach(c=>{cum[c]=bosom[c].reduce((a,b)=>a+b,0);});const cumAll=cum.자사몰+cum.스스+cum.쿠팡;
+new Chart(document.getElementById('c1pie'),{type:'doughnut',data:{labels:['자사몰 '+(cum.자사몰/cumAll*100).toFixed(1)+'%','스스 '+(cum.스스/cumAll*100).toFixed(1)+'%','쿠팡 '+(cum.쿠팡/cumAll*100).toFixed(1)+'%'],datasets:[{data:[cum.자사몰,cum.스스,cum.쿠팡],backgroundColor:['#3b82f6','#f59e0b','#ef4444'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'채널 비중 (누계)',font:{size:13}}}}});
+
+// ===== Chart 2: Share =====
+const sh={};['자사몰','스스','쿠팡'].forEach(c=>{sh[c]=bosom[c].map((v,i)=>chT[c][i]>0?(v/chT[c][i]*100):0);});
+new Chart(document.getElementById('c2share'),{type:'line',data:{labels:M,datasets:[
+  {label:'자사몰',data:sh.자사몰,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',fill:true,tension:.3,pointRadius:4},
+  {label:'스스',data:sh.스스,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',fill:true,tension:.3,pointRadius:4},
+  {label:'쿠팡',data:sh.쿠팡,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',fill:true,tension:.3,pointRadius:4}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'각 채널 내 보솜 비중 (%)',font:{size:13}}},scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f3f4f6'}},x:{grid:{display:false}}}}});
+
+// ===== Chart 3: N배송 =====
+const gNpct=nShip.gN.map((v,i)=>v/(v+nShip.gG[i])*100);
+const rNpct=nShip.rN.map((v,i)=>v/(v+nShip.rG[i])*100);
+new Chart(document.getElementById('c3nship'),{type:'bar',data:{labels:M,datasets:[
+  {label:'N배송',data:nTotal,backgroundColor:'#22c55e',borderRadius:2},
+  {label:'일반',data:gTotal,backgroundColor:'#d1d5db',borderRadius:2}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'스스 보솜패드 배송구분별 매출',font:{size:13}},tooltip:{callbacks:{afterBody:function(ctx){const i=ctx[0].dataIndex;return 'N배송 비중: '+nPct[i].toFixed(1)+'%';}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'}}}}});
+
+// ===== Chart 4: CM =====
+new Chart(document.getElementById('c4cm'),{type:'bar',data:{labels:M.slice(0,5),datasets:[
+  {label:'기본형',data:cmD.g,backgroundColor:'#3b82f6',borderRadius:3},
+  {label:'라이트',data:cmD.r,backgroundColor:'#93c5fd',borderRadius:3}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'}}}}});
+
+// ===== Simulator =====
+let curD=2000,curV=10,simC=null,beC=null;
+function calc(d,vp){
+  const vol=vp/100,eff=d*(1-S.vc);
+  const cg=S.g.cm-eff,cr=S.r.cm-eff;
+  const qG=Math.round(S.g.qty*(1+vol)),qR=Math.round(S.r.qty*(1+vol)),tQ=qG+qR;
+  const nRev=qG*(S.g.price-d)+qR*(S.r.price-d);
+  const nCM=qG*cg+qR*cr;
+  const cmNoVol=S.g.qty*(S.g.cm-eff)+S.r.qty*(S.r.cm-eff);
+  const loss=S.totalCM-cmNoVol;
+  const beM=d>0?S.totalCM/cmNoVol:1;
+  return{d,vp,eff:Math.round(eff),cg:Math.round(cg),cr:Math.round(cr),qG,qR,tQ,nRev:Math.round(nRev),addRev:Math.round(nRev-S.totalRev),nCM:Math.round(nCM),cmChg:Math.round(nCM-S.totalCM),cmNoVol:Math.round(cmNoVol),loss:Math.round(loss),recPct:loss>0?Math.min(((nCM-cmNoVol)/loss)*100,999):0,bePct:d>0?(beM-1)*100:0,pG:S.g.price-d,pR:S.r.price-d};
+}
+
+function render(){
+  const c=calc(curD,curV),c0=calc(curD,0);
+  document.getElementById('simCards').innerHTML=`
+    <div class="sim-card neg"><div class="label">CM 순손실<br>(동일수량)</div><div class="val" style="color:#ef4444;">${curD===0?'—':'−'+fmt(c0.loss)}</div><div class="sub">${curD===0?'':fmtPct(-c0.loss/S.totalCM*100)}</div></div>
+    <div class="sim-card ${c.addRev>=0?'pos':'neg'}"><div class="label">추가 확보 매출<br>(vs 현행)</div><div class="val" style="color:${c.addRev>=0?'var(--green)':'var(--red)'};">${c.addRev>=0?'+':''}${fmtM(c.addRev)}</div><div class="sub">${fmtPct(c.addRev/S.totalRev*100)}</div></div>
+    <div class="sim-card ${c.cmChg>=0?'pos':'warn'}"><div class="label">순 CM 변동<br>(인하+수량)</div><div class="val" style="color:${c.cmChg>=0?'var(--green)':'var(--amber)'};">${c.cmChg>=0?'+':''}${fmt(c.cmChg)}</div><div class="sub">${fmtPct(c.cmChg/S.totalCM*100)}</div></div>
+    <div class="sim-card target"><div class="label">예상 수량</div><div class="val" style="color:var(--accent);">${fmt(c.tQ)}개</div><div class="sub">기본 ${c.qG} + 라이트 ${c.qR}</div></div>
+    <div class="sim-card target"><div class="label">예상 월 매출</div><div class="val" style="color:var(--accent);">${fmtM(c.nRev)}</div><div class="sub">CM ${fmtM(c.nCM)} (${(c.nCM/c.nRev*100).toFixed(1)}%)</div></div>`;
+
+  const tb=document.querySelector('#simDetail tbody');
+  const rows=[
+    ['인하 후 단가',fmt(c.pG)+'원',fmt(c.pR)+'원','—'],
+    ['현재 CM/개',fmt(S.g.cm)+'원',fmt(S.r.cm)+'원','—'],
+    ['인하 후 CM/개',`<span class="${curD?'red':''}">${fmt(c.cg)}원</span>`,`<span class="${curD?'red':''}">${fmt(c.cr)}원</span>`,'—'],
+    ['예상 수량 (+'+curV+'%)',c.qG+'개',c.qR+'개',c.tQ+'개'],
+    ['예상 매출',fmtM(c.qG*c.pG),fmtM(c.qR*c.pR),fmtM(c.nRev)],
+    ['예상 CM',`<span class="${c.cmChg<0?'amber':'green'}">${fmt(c.qG*c.cg)}</span>`,`<span class="${c.cmChg<0?'amber':'green'}">${fmt(c.qR*c.cr)}</span>`,`<span class="${c.cmChg<0?'amber':'green'} bold">${fmt(c.nCM)}</span>`],
+    ['순 CM 변동','','',`<span class="${c.cmChg>=0?'green':'red'} bold">${c.cmChg>=0?'+':''}${fmt(c.cmChg)}</span>`],
+    ['손익분기 수량증가율','','',curD?`<span class="blue">${c.bePct.toFixed(1)}%</span>`:'—']
+  ];
+  tb.innerHTML=rows.map((r,i)=>`<tr ${i>=5?'style="background:#f8fafc;"':''}><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+
+  const ds=[0,500,1000,1500,2000,2500,3000];
+  if(simC)simC.destroy();
+  simC=new Chart(document.getElementById('c5sim'),{type:'bar',data:{labels:ds.map(d=>d===0?'현행':'−'+fmt(d)),datasets:[
+    {label:'추가 확보 매출',data:ds.map(d=>calc(d,curV).addRev),backgroundColor:ds.map(d=>d===curD?'#22c55e':'#bbf7d0'),borderRadius:3,yAxisID:'y'},
+    {label:'순 CM',data:ds.map(d=>calc(d,curV).nCM),type:'line',borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:ds.map(d=>d===curD?'#ef4444':'#fca5a5'),yAxisID:'y1'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},title:{display:true,text:`인하폭별 추가 매출 vs CM (수량 +${curV}%)`,font:{size:12}}},scales:{y:{position:'left',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'},title:{display:true,text:'추가 매출',font:{size:10}}},y1:{position:'right',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{display:false},title:{display:true,text:'순 CM',font:{size:10}}},x:{grid:{display:false}}}}});
+
+  document.getElementById('scenarioVolLabel').textContent=`(수량 +${curV}% 가정)`;
+  document.querySelector('#scenarioTbl tbody').innerHTML=ds.map(d=>{
+    const s=calc(d,curV),isB=d===0,isCur=d===curD&&d!==0,isBE=s.cmChg>=0&&d!==0;
+    return `<tr ${isCur?'class="hl"':isBE?'class="breakeven"':''}>
+      <td>${isB?'현행':'−'+fmt(d)+'원'}</td><td>${fmt(s.pG)}원</td><td>${fmt(s.pR)}원</td>
+      <td>${fmt(s.tQ)}개 ${isB?'':'(+'+curV+'%)'}</td><td>${fmtM(s.nRev)}</td>
+      <td>${isB?'—':s.addRev>=0?'<span class="green">+'+fmtM(s.addRev)+'</span>':'<span class="red">'+fmtM(s.addRev)+'</span>'}</td>
+      <td>${fmtM(s.nCM)}</td>
+      <td>${isB?'—':s.cmChg>=0?'<span class="green">+'+fmt(s.cmChg)+'</span>':'<span class="red">'+fmt(s.cmChg)+'</span>'}</td>
+      <td>${isB?'—':s.loss>0?s.recPct.toFixed(0)+'%':'—'}</td></tr>`;
+  }).join('');
+
+  const beps=ds.filter(d=>d>0).map(d=>({d,be:calc(d,0).bePct}));
+  if(beC)beC.destroy();
+  beC=new Chart(document.getElementById('c5be'),{type:'bar',data:{labels:beps.map(x=>'−'+fmt(x.d)),datasets:[
+    {label:'손익분기 수량증가율',data:beps.map(x=>x.be),backgroundColor:beps.map(x=>x.be<=curV?'#86efac':x.d===curD?'#fbbf24':'#fde68a'),borderRadius:3},
+    {label:'현재 예상 (+'+curV+'%)',data:beps.map(()=>curV),type:'line',borderColor:'#22c55e',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f3f4f6'},title:{display:true,text:'수량 증가율',font:{size:10}}},x:{grid:{display:false}}}}});
+
+  const ins=document.getElementById('simInsight');
+  if(curD===0){ins.innerHTML='인하 폭을 선택하여 시뮬레이션하세요.';return;}
+  const v=c.cmChg>=0
+    ?`<strong style="color:#16a34a;">CM 유지 가능:</strong> +${curV}% 수량 증가 시 CM +${fmt(c.cmChg)}원. 추가 매출 +${fmtM(c.addRev)}도 확보.`
+    :`<strong>CM 적자 구간:</strong> +${curV}%로는 CM ${fmt(c.cmChg)}원 부족. 손익분기 최소 <strong>+${c.bePct.toFixed(1)}%</strong> 필요.`;
+  ins.innerHTML=`<strong>−${fmt(curD)}원 인하 + 수량 +${curV}%:</strong> 추가 매출 <strong>${c.addRev>=0?'+':''}${fmtM(c.addRev)}</strong>, 순 CM <strong>${c.cmChg>=0?'+':''}${fmt(c.cmChg)}</strong>. ${v} 스스 N배송 비중 95%+ → 카니발 리스크는 제한적 (Section 3 참조).`;
+}
+
+document.querySelectorAll('.sim-btn').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('.sim-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active');curD=parseInt(this.dataset.d);render();}));
+document.querySelectorAll('.vol-btn').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('.vol-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active');curV=parseInt(this.dataset.v);render();}));
+render();
+</script>
+</body>
+</html>
