@@ -250,7 +250,7 @@
     <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;">전체 시나리오 비교표 <span id="scenarioVolLabel" style="font-size:11px;color:var(--green);font-weight:600;"></span></div>
     <div style="overflow-x:auto;">
     <table class="scenario-tbl" id="scenarioTbl">
-      <thead><tr><th>인하폭</th><th>기본형</th><th>라이트</th><th>예상 수량</th><th>예상 매출</th><th>추가 확보 매출</th><th>예상 CM</th><th>순 CM 변동</th><th>CM 회수율</th></tr></thead>
+      <thead><tr><th>인하폭</th><th>기본형</th><th>라이트</th><th>예상 수량</th><th>예상 매출</th><th>추가 확보 매출</th><th>예상 CM</th><th>순 CM 변동</th><th>CM 유지율</th></tr></thead>
       <tbody></tbody>
     </table>
     </div>
@@ -359,22 +359,26 @@ function render(){
   tb.innerHTML=rows.map((r,i)=>`<tr ${i>=5?'style="background:#f8fafc;"':''}><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
 
   const ds=[0,500,1000,1500,2000,2500,3000];
+  const base=calc(0,0);
   if(simC)simC.destroy();
+  const chartData=ds.map(d=>{const s=d===0?base:calc(d,curV);return{addRev:s.nRev-base.nRev,nCM:s.nCM};});
   simC=new Chart(document.getElementById('c5sim'),{type:'bar',data:{labels:ds.map(d=>d===0?'현행':'−'+fmt(d)),datasets:[
-    {label:'추가 확보 매출',data:ds.map(d=>calc(d,curV).addRev),backgroundColor:ds.map(d=>d===curD?'#22c55e':'#bbf7d0'),borderRadius:3,yAxisID:'y'},
-    {label:'순 CM',data:ds.map(d=>calc(d,curV).nCM),type:'line',borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:ds.map(d=>d===curD?'#ef4444':'#fca5a5'),yAxisID:'y1'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},title:{display:true,text:`인하폭별 추가 매출 vs CM (수량 +${curV}%)`,font:{size:12}}},scales:{y:{position:'left',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'},title:{display:true,text:'추가 매출',font:{size:10}}},y1:{position:'right',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{display:false},title:{display:true,text:'순 CM',font:{size:10}}},x:{grid:{display:false}}}}});
+    {label:'추가 확보 매출',data:chartData.map(x=>x.addRev),backgroundColor:ds.map(d=>d===curD?'#22c55e':'#bbf7d0'),borderRadius:3,yAxisID:'y'},
+    {label:'순 CM',data:chartData.map(x=>x.nCM),type:'line',borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:ds.map(d=>d===curD?'#ef4444':'#fca5a5'),yAxisID:'y1'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},title:{display:true,text:`인하폭별 추가 매출 vs CM (현행 기준, 인하 시 수량 +${curV}%)`,font:{size:12}}},scales:{y:{position:'left',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'},title:{display:true,text:'추가 매출',font:{size:10}}},y1:{position:'right',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{display:false},title:{display:true,text:'순 CM',font:{size:10}}},x:{grid:{display:false}}}}});
 
-  document.getElementById('scenarioVolLabel').textContent=`(수량 +${curV}% 가정)`;
+  document.getElementById('scenarioVolLabel').textContent=`(가격 인하 시 수량 +${curV}% 가정)`;
   document.querySelector('#scenarioTbl tbody').innerHTML=ds.map(d=>{
-    const s=calc(d,curV),isB=d===0,isCur=d===curD&&d!==0,isBE=s.cmChg>=0&&d!==0;
+    const isB=d===0,s=isB?base:calc(d,curV);
+    const isCur=d===curD&&d!==0,isBE=!isB&&s.nCM>=base.nCM;
+    const addRev=s.nRev-base.nRev,cmChg=s.nCM-base.nCM;
     return `<tr ${isCur?'class="hl"':isBE?'class="breakeven"':''}>
-      <td>${isB?'현행':'−'+fmt(d)+'원'}</td><td>${fmt(s.pG)}원</td><td>${fmt(s.pR)}원</td>
-      <td>${fmt(s.tQ)}개 ${isB?'':'(+'+curV+'%)'}</td><td>${fmtM(s.nRev)}</td>
-      <td>${isB?'—':s.addRev>=0?'<span class="green">+'+fmtM(s.addRev)+'</span>':'<span class="red">'+fmtM(s.addRev)+'</span>'}</td>
+      <td>${isB?'현행 (기준)':'−'+fmt(d)+'원'}</td><td>${fmt(s.pG)}원</td><td>${fmt(s.pR)}원</td>
+      <td>${fmt(s.tQ)}개${isB?'':' (+'+curV+'%)'}</td><td>${fmtM(s.nRev)}</td>
+      <td>${isB?'—':addRev>=0?'<span class="green">+'+fmtM(addRev)+'</span>':'<span class="red">'+fmtM(addRev)+'</span>'}</td>
       <td>${fmtM(s.nCM)}</td>
-      <td>${isB?'—':s.cmChg>=0?'<span class="green">+'+fmt(s.cmChg)+'</span>':'<span class="red">'+fmt(s.cmChg)+'</span>'}</td>
-      <td>${isB?'—':s.loss>0?s.recPct.toFixed(0)+'%':'—'}</td></tr>`;
+      <td>${isB?'—':cmChg>=0?'<span class="green">+'+fmt(cmChg)+'</span>':'<span class="red">'+fmt(cmChg)+'</span>'}</td>
+      <td>${isB?'—':base.nCM>0?(s.nCM/base.nCM*100).toFixed(0)+'%':'—'}</td></tr>`;
   }).join('');
 
   const beps=ds.filter(d=>d>0).map(d=>({d,be:calc(d,0).bePct}));
