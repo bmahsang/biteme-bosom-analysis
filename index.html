@@ -72,7 +72,7 @@
 
 <div class="header">
   <h1>보솜패드 채널 매출 분석 & 가격 조정 시뮬레이터</h1>
-  <div class="sub">데이터: 2026년 1~6월 (6월 MTD) · 분석 기준: 5월 · 자사몰 현재가: 기본형 49,900 / 라이트 44,900</div>
+  <div class="sub">데이터: 2026년 1~6월 (6월 MTD) · 분석 기준: 5월 · 자사몰 현재가: 기본형 47,900 / 라이트 42,900</div>
 </div>
 
 <!-- ===== 1. 채널 비중 ===== -->
@@ -196,7 +196,7 @@
     </div>
     <div>
       <table>
-        <thead><tr><th>항목</th><th>기본형 (49,900)</th><th>라이트 (44,900)</th><th>합계</th></tr></thead>
+        <thead><tr><th>항목</th><th>기본형 (47,900)</th><th>라이트 (42,900)</th><th>합계</th></tr></thead>
         <tbody>
           <tr><td>월 수량</td><td>121개</td><td>203개</td><td>324개</td></tr>
           <tr><td>월 매출</td><td>6,018,207</td><td>9,119,305</td><td>15,137,512</td></tr>
@@ -284,7 +284,7 @@ const gTotal=nShip.gG.map((v,i)=>v+nShip.rG[i]);
 const allTotal=nTotal.map((v,i)=>v+gTotal[i]);
 const nPct=nTotal.map((v,i)=>v/allTotal[i]*100);
 
-const S={g:{price:49900,qty:121,cm:3016},r:{price:44900,qty:203,cm:4085},totalQty:324,vc:0.3458,totalCM:1194146,totalRev:15137512};
+const S={g:{price:47900,qty:121,cm:3016},r:{price:42900,qty:203,cm:4085},totalQty:324,vc:0.3458,totalCM:1194146,totalRev:15137512};
 const fmt=n=>Math.round(n).toLocaleString('ko-KR');
 const fmtM=n=>(n/1e6).toFixed(1)+'M';
 const fmtPct=n=>(n>=0?'+':'')+n.toFixed(1)+'%';
