@@ -72,7 +72,7 @@
 
 <div class="header">
   <h1>보솜패드 채널 매출 분석 & 가격 조정 시뮬레이터</h1>
-  <div class="sub">데이터: 2026년 1~6월 (6월 MTD) · 분석 기준: 5월 · 자사몰 현재가: 기본형 47,900 / 라이트 42,900</div>
+  <div class="sub">데이터: 2026년 1~6월 (6월 MTD) · 분석 기준: 5월 · 자사몰 현재가: 기본형 대형 47,900 / 표준 50,900 · 라이트 대형 42,900 / 표준 45,900 · 할인율 5.6%</div>
 </div>
 
 <!-- ===== 1. 채널 비중 ===== -->
@@ -183,41 +183,25 @@
 
 <!-- ===== 4. CM 구조 ===== -->
 <div class="section">
-  <div class="section-title"><span class="num">4</span> 자사몰 보솜패드 공헌이익 구조 (5월)</div>
+  <div class="section-title"><span class="num">4</span> 자사몰 보솜패드 공헌이익 구조 (5월 · 4팩세트)</div>
+  <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">할인율 5.6% 반영 (거래액 ÷ 정가 = 94.4%) · 변동비율 34.6% · 원가: 제품원가 기준</p>
   <div class="grid-2">
-    <div>
-      <div style="text-align:center;font-size:12px;color:#6b7280;margin-bottom:8px;">매출 → 비용 → CM 워터폴</div>
-      <div class="cm-waterfall">
-        <div class="wf-item"><div class="wf-val" style="color:var(--accent);">15,137,512</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:100%;background:#93c5fd;"></div></div><div class="wf-label">매출</div></div>
-        <div class="wf-item"><div class="wf-val" style="color:var(--red);">−8,709,037</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:57.5%;background:#fca5a5;"></div></div><div class="wf-label">원가 (57.5%)</div></div>
-        <div class="wf-item"><div class="wf-val" style="color:var(--amber);">−5,234,329</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:34.6%;background:#fde68a;"></div></div><div class="wf-label">변동비 (34.6%)</div></div>
-        <div class="wf-item"><div class="wf-val" style="color:var(--green);">1,194,146</div><div class="wf-bar-wrap"><div class="wf-bar" style="height:7.9%;background:#86efac;"></div></div><div class="wf-label">CM (7.9%)</div></div>
-      </div>
-    </div>
+    <div><div class="chart-box"><canvas id="c4cm"></canvas></div></div>
     <div>
       <table>
-        <thead><tr><th>항목</th><th>기본형 (47,900)</th><th>라이트 (42,900)</th><th>합계</th></tr></thead>
-        <tbody>
-          <tr><td>월 수량</td><td>121개</td><td>203개</td><td>324개</td></tr>
-          <tr><td>월 매출</td><td>6,018,207</td><td>9,119,305</td><td>15,137,512</td></tr>
-          <tr><td>원가</td><td>3,572,609</td><td>5,136,428</td><td>8,709,037</td></tr>
-          <tr><td>변동비</td><td>2,080,734</td><td>3,153,595</td><td>5,234,329</td></tr>
-          <tr style="border-top:2px solid #e5e7eb;"><td class="bold">공헌이익</td><td class="green bold">364,864</td><td class="green bold">829,282</td><td class="green bold">1,194,146</td></tr>
-          <tr><td>CM/개</td><td class="bold">3,016원</td><td class="bold">4,085원</td><td>—</td></tr>
-          <tr><td>CM률</td><td>6.1%</td><td>9.1%</td><td>7.9%</td></tr>
-        </tbody>
+        <thead><tr><th>SKU</th><th>정가</th><th>수량</th><th>거래액</th><th>CM</th><th>CM/개</th><th>CM률</th></tr></thead>
+        <tbody id="cmTb"></tbody>
       </table>
     </div>
   </div>
-  <div><div style="font-size:12px;color:#6b7280;margin:16px 0 8px;">월별 자사몰 보솜 공헌이익 추이</div><div class="chart-box" style="height:180px;"><canvas id="c4cm"></canvas></div></div>
 </div>
 
 <!-- ===== 5. 시뮬레이터 ===== -->
 <div class="section">
-  <div class="section-title"><span class="num">5</span> 가격 조정 시뮬레이터</div>
-  <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">인하 폭과 예상 수량 증가율을 선택하면 추가 확보 매출·순 CM 변동이 실시간 계산됩니다.</p>
+  <div class="section-title"><span class="num">5</span> 가격 조정 시뮬레이터 (할인율 반영)</div>
+  <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">4개 SKU 동일 인하 · 할인율 5.6% 적용 후 실거래액 기준 · 매출 증가 vs CM 손실 최적점 탐색</p>
   <div class="ctrl-group">
-    <div class="ctrl-label">인하 폭</div>
+    <div class="ctrl-label">인하 폭 (4개 SKU 동일)</div>
     <div class="sim-controls" id="priceBtns">
       <button class="sim-btn" data-d="0">현행</button>
       <button class="sim-btn" data-d="500">−500</button>
@@ -242,7 +226,7 @@
   </div>
   <div class="sim-result" id="simCards"></div>
   <div class="grid-2">
-    <div><table id="simDetail"><thead><tr><th>항목</th><th>기본형</th><th>라이트</th><th>합계</th></tr></thead><tbody></tbody></table></div>
+    <div><div style="overflow-x:auto;"><table id="simDetail"><thead><tr><th>항목</th><th>기본 대형</th><th>기본 표준</th><th>라이트 대형</th><th>라이트 표준</th><th>합계</th></tr></thead><tbody></tbody></table></div></div>
     <div><div class="chart-box" style="height:260px;"><canvas id="c5sim"></canvas></div></div>
   </div>
   <hr class="divider">
@@ -250,7 +234,7 @@
     <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;">전체 시나리오 비교표 <span id="scenarioVolLabel" style="font-size:11px;color:var(--green);font-weight:600;"></span></div>
     <div style="overflow-x:auto;">
     <table class="scenario-tbl" id="scenarioTbl">
-      <thead><tr><th>인하폭</th><th>기본형</th><th>라이트</th><th>예상 수량</th><th>예상 매출</th><th>추가 확보 매출</th><th>예상 CM</th><th>순 CM 변동</th><th>CM 유지율</th></tr></thead>
+      <thead><tr><th>인하폭</th><th>예상 수량</th><th>예상 매출</th><th>추가 확보 매출</th><th>예상 CM</th><th>순 CM 변동</th><th>CM 유지율</th><th>BEP 증가율</th></tr></thead>
       <tbody></tbody>
     </table>
     </div>
@@ -263,16 +247,14 @@
   <div class="insight" id="simInsight"></div>
 </div>
 
-<div class="footer">바잇미 자사몰 · 보솜패드 가격 시뮬레이션 · 2026-06-17</div>
+<div class="footer">바잇미 자사몰 · 보솜패드 가격 시뮬레이션 · 2026-07-02 · 할인율 반영 4-SKU 기준</div>
 </div>
 
 <script>
 const M=['1월','2월','3월','4월','5월','6월'];
 const bosom={자사몰:[24977899,16561065,21934687,15050709,15137512,9656642],스스:[58949433,52109435,71161886,46847545,48153779,26679838],쿠팡:[10562184,125975836,126108131,0,43155556,38819129]};
 const chT={자사몰:[193906962,163508220,192192805,173504189,158294366,124330466],스스:[396679411,242709234,291962380,374029021,313109583,166062157],쿠팡:[51845191,201724233,245761471,45261827,145420088,88157524]};
-const cmD={g:[320695,-52865,565565,336864,364864],r:[1828684,819017,1516709,998652,829282]};
 
-// N배송 data
 const nShip={
   gN:[20966101,19636014,25475815,16884558,19073228,9292689],
   gG:[3407108,1963631,2374323,1765365,721819,472591],
@@ -284,7 +266,17 @@ const gTotal=nShip.gG.map((v,i)=>v+nShip.rG[i]);
 const allTotal=nTotal.map((v,i)=>v+gTotal[i]);
 const nPct=nTotal.map((v,i)=>v/allTotal[i]*100);
 
-const S={g:{price:47900,qty:121,cm:3016},r:{price:42900,qty:203,cm:4085},totalQty:324,vc:0.3458,totalCM:1194146,totalRev:15137512};
+// === 4 SKU (5월 4팩, 단품 제외) ===
+const SKU=[
+  {n:'기본형 대형',p:47900,q:98,c:20692,clr:'#2563eb'},
+  {n:'기본형 표준',p:50900,q:110,c:25696,clr:'#60a5fa'},
+  {n:'라이트 대형',p:42900,q:76,c:21772,clr:'#f59e0b'},
+  {n:'라이트 표준',p:45900,q:69,c:24192,clr:'#fbbf24'}
+];
+const DC=0.944,VC=0.3458;
+SKU.forEach(s=>{s.r=s.p*s.q*DC;s.cm=s.r*(1-VC)-s.c*s.q;s.cmU=Math.round(s.cm/s.q);});
+const B={rev:SKU.reduce((a,s)=>a+s.r,0),cm:SKU.reduce((a,s)=>a+s.cm,0),qty:SKU.reduce((a,s)=>a+s.q,0)};
+
 const fmt=n=>Math.round(n).toLocaleString('ko-KR');
 const fmtM=n=>(n/1e6).toFixed(1)+'M';
 const fmtPct=n=>(n>=0?'+':'')+n.toFixed(1)+'%';
@@ -296,7 +288,6 @@ new Chart(document.getElementById('c1stack'),{type:'bar',data:{labels:M,datasets
   {label:'쿠팡',data:bosom.쿠팡,backgroundColor:'#ef4444',borderRadius:2}
 ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'월별 보솜패드 매출 (채널별)',font:{size:13}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'}}}}});
 
-// Pie
 const cum={};['자사몰','스스','쿠팡'].forEach(c=>{cum[c]=bosom[c].reduce((a,b)=>a+b,0);});const cumAll=cum.자사몰+cum.스스+cum.쿠팡;
 new Chart(document.getElementById('c1pie'),{type:'doughnut',data:{labels:['자사몰 '+(cum.자사몰/cumAll*100).toFixed(1)+'%','스스 '+(cum.스스/cumAll*100).toFixed(1)+'%','쿠팡 '+(cum.쿠팡/cumAll*100).toFixed(1)+'%'],datasets:[{data:[cum.자사몰,cum.스스,cum.쿠팡],backgroundColor:['#3b82f6','#f59e0b','#ef4444'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'채널 비중 (누계)',font:{size:13}}}}});
 
@@ -309,79 +300,91 @@ new Chart(document.getElementById('c2share'),{type:'line',data:{labels:M,dataset
 ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'각 채널 내 보솜 비중 (%)',font:{size:13}}},scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f3f4f6'}},x:{grid:{display:false}}}}});
 
 // ===== Chart 3: N배송 =====
-const gNpct=nShip.gN.map((v,i)=>v/(v+nShip.gG[i])*100);
-const rNpct=nShip.rN.map((v,i)=>v/(v+nShip.rG[i])*100);
 new Chart(document.getElementById('c3nship'),{type:'bar',data:{labels:M,datasets:[
   {label:'N배송',data:nTotal,backgroundColor:'#22c55e',borderRadius:2},
   {label:'일반',data:gTotal,backgroundColor:'#d1d5db',borderRadius:2}
 ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}},title:{display:true,text:'스스 보솜패드 배송구분별 매출',font:{size:13}},tooltip:{callbacks:{afterBody:function(ctx){const i=ctx[0].dataIndex;return 'N배송 비중: '+nPct[i].toFixed(1)+'%';}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'}}}}});
 
-// ===== Chart 4: CM =====
-new Chart(document.getElementById('c4cm'),{type:'bar',data:{labels:M.slice(0,5),datasets:[
-  {label:'기본형',data:cmD.g,backgroundColor:'#3b82f6',borderRadius:3},
-  {label:'라이트',data:cmD.r,backgroundColor:'#93c5fd',borderRadius:3}
-]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'}}}}});
+// ===== Chart 4: SKU별 CM =====
+document.getElementById('cmTb').innerHTML=SKU.map(s=>`<tr><td>${s.n}</td><td>${fmt(s.p)}</td><td>${s.q}개</td><td>${fmt(Math.round(s.r))}</td><td class="green bold">${fmt(Math.round(s.cm))}</td><td class="bold">${fmt(s.cmU)}원</td><td>${(s.cm/s.r*100).toFixed(1)}%</td></tr>`).join('')+`<tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td>합계</td><td>—</td><td>${B.qty}개</td><td>${fmt(Math.round(B.rev))}</td><td class="green bold">${fmt(Math.round(B.cm))}</td><td>—</td><td>${(B.cm/B.rev*100).toFixed(1)}%</td></tr>`;
+
+new Chart(document.getElementById('c4cm'),{type:'bar',data:{labels:SKU.map(s=>s.n),datasets:[
+  {label:'CM',data:SKU.map(s=>Math.round(s.cm)),backgroundColor:SKU.map(s=>s.clr),borderRadius:4},
+  {label:'거래액 (스케일 ÷10)',data:SKU.map(s=>Math.round(s.r/10)),backgroundColor:SKU.map(s=>s.clr+'33'),borderRadius:4}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},title:{display:true,text:'SKU별 CM vs 거래액 (5월)',font:{size:13}}},scales:{y:{ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'}},x:{grid:{display:false}}}}});
 
 // ===== Simulator =====
 let curD=2000,curV=10,simC=null,beC=null;
+
 function calc(d,vp){
-  const vol=vp/100,eff=d*(1-S.vc);
-  const cg=S.g.cm-eff,cr=S.r.cm-eff;
-  const qG=Math.round(S.g.qty*(1+vol)),qR=Math.round(S.r.qty*(1+vol)),tQ=qG+qR;
-  const nRev=qG*(S.g.price-d)+qR*(S.r.price-d);
-  const nCM=qG*cg+qR*cr;
-  const cmNoVol=S.g.qty*(S.g.cm-eff)+S.r.qty*(S.r.cm-eff);
-  const loss=S.totalCM-cmNoVol;
-  const beM=d>0?S.totalCM/cmNoVol:1;
-  return{d,vp,eff:Math.round(eff),cg:Math.round(cg),cr:Math.round(cr),qG,qR,tQ,nRev:Math.round(nRev),addRev:Math.round(nRev-S.totalRev),nCM:Math.round(nCM),cmChg:Math.round(nCM-S.totalCM),cmNoVol:Math.round(cmNoVol),loss:Math.round(loss),recPct:loss>0?Math.min(((nCM-cmNoVol)/loss)*100,999):0,bePct:d>0?(beM-1)*100:0,pG:S.g.price-d,pR:S.r.price-d};
+  const v=vp/100;
+  let tR=0,tC=0,tQ=0;
+  const det=SKU.map(s=>{
+    const np=s.p-d,nq=Math.round(s.q*(1+v));
+    const nr=np*nq*DC,ncm=nr*(1-VC)-s.c*nq;
+    tR+=nr;tC+=ncm;tQ+=nq;
+    return{n:s.n,p:np,q:nq,r:nr,cm:ncm,cmU:Math.round(ncm/nq)};
+  });
+  return{d,vp,det,tR:Math.round(tR),tC:Math.round(tC),tQ};
+}
+
+function bePct(d){
+  if(d===0)return 0;
+  const cmSame=SKU.reduce((a,s)=>a+((s.p-d)*DC*(1-VC)-s.c)*s.q,0);
+  return cmSame>0?(B.cm/cmSame-1)*100:999;
 }
 
 function render(){
   const c=calc(curD,curV),c0=calc(curD,0);
+  const loss=Math.round(B.cm-c0.tC),addRev=c.tR-Math.round(B.rev),cmChg=c.tC-Math.round(B.cm);
+  const be=bePct(curD);
+
   document.getElementById('simCards').innerHTML=`
-    <div class="sim-card neg"><div class="label">CM 순손실<br>(동일수량)</div><div class="val" style="color:#ef4444;">${curD===0?'—':'−'+fmt(c0.loss)}</div><div class="sub">${curD===0?'':fmtPct(-c0.loss/S.totalCM*100)}</div></div>
-    <div class="sim-card ${c.addRev>=0?'pos':'neg'}"><div class="label">추가 확보 매출<br>(vs 현행)</div><div class="val" style="color:${c.addRev>=0?'var(--green)':'var(--red)'};">${c.addRev>=0?'+':''}${fmtM(c.addRev)}</div><div class="sub">${fmtPct(c.addRev/S.totalRev*100)}</div></div>
-    <div class="sim-card ${c.cmChg>=0?'pos':'warn'}"><div class="label">순 CM 변동<br>(인하+수량)</div><div class="val" style="color:${c.cmChg>=0?'var(--green)':'var(--amber)'};">${c.cmChg>=0?'+':''}${fmt(c.cmChg)}</div><div class="sub">${fmtPct(c.cmChg/S.totalCM*100)}</div></div>
-    <div class="sim-card target"><div class="label">예상 수량</div><div class="val" style="color:var(--accent);">${fmt(c.tQ)}개</div><div class="sub">기본 ${c.qG} + 라이트 ${c.qR}</div></div>
-    <div class="sim-card target"><div class="label">예상 월 매출</div><div class="val" style="color:var(--accent);">${fmtM(c.nRev)}</div><div class="sub">CM ${fmtM(c.nCM)} (${(c.nCM/c.nRev*100).toFixed(1)}%)</div></div>`;
+    <div class="sim-card neg"><div class="label">CM 순손실<br>(동일수량)</div><div class="val" style="color:#ef4444;">${curD===0?'—':'−'+fmt(loss)}</div><div class="sub">${curD===0?'':fmtPct(-loss/B.cm*100)}</div></div>
+    <div class="sim-card ${addRev>=0?'pos':'neg'}"><div class="label">추가 확보 매출<br>(할인 반영)</div><div class="val" style="color:${addRev>=0?'var(--green)':'var(--red)'};">${addRev>=0?'+':''}${fmtM(addRev)}</div><div class="sub">${fmtPct(addRev/B.rev*100)}</div></div>
+    <div class="sim-card ${cmChg>=0?'pos':'warn'}"><div class="label">순 CM 변동<br>(인하+수량)</div><div class="val" style="color:${cmChg>=0?'var(--green)':'var(--amber)'};">${cmChg>=0?'+':''}${fmt(cmChg)}</div><div class="sub">${fmtPct(cmChg/B.cm*100)}</div></div>
+    <div class="sim-card target"><div class="label">예상 수량</div><div class="val" style="color:var(--accent);">${fmt(c.tQ)}개</div><div class="sub">${c.det.map(d=>d.q).join(' / ')}</div></div>
+    <div class="sim-card target"><div class="label">예상 월 매출</div><div class="val" style="color:var(--accent);">${fmtM(c.tR)}</div><div class="sub">CM ${fmtM(c.tC)} (${(c.tC/c.tR*100).toFixed(1)}%)</div></div>`;
 
   const tb=document.querySelector('#simDetail tbody');
   const rows=[
-    ['인하 후 단가',fmt(c.pG)+'원',fmt(c.pR)+'원','—'],
-    ['현재 CM/개',fmt(S.g.cm)+'원',fmt(S.r.cm)+'원','—'],
-    ['인하 후 CM/개',`<span class="${curD?'red':''}">${fmt(c.cg)}원</span>`,`<span class="${curD?'red':''}">${fmt(c.cr)}원</span>`,'—'],
-    ['예상 수량 (+'+curV+'%)',c.qG+'개',c.qR+'개',c.tQ+'개'],
-    ['예상 매출',fmtM(c.qG*c.pG),fmtM(c.qR*c.pR),fmtM(c.nRev)],
-    ['예상 CM',`<span class="${c.cmChg<0?'amber':'green'}">${fmt(c.qG*c.cg)}</span>`,`<span class="${c.cmChg<0?'amber':'green'}">${fmt(c.qR*c.cr)}</span>`,`<span class="${c.cmChg<0?'amber':'green'} bold">${fmt(c.nCM)}</span>`],
-    ['순 CM 변동','','',`<span class="${c.cmChg>=0?'green':'red'} bold">${c.cmChg>=0?'+':''}${fmt(c.cmChg)}</span>`],
-    ['손익분기 수량증가율','','',curD?`<span class="blue">${c.bePct.toFixed(1)}%</span>`:'—']
+    ['인하 후 정가',...c.det.map(d=>fmt(d.p)+'원'),'—'],
+    ['거래 단가 (×94.4%)',...c.det.map(d=>fmt(Math.round(d.p*DC))+'원'),'—'],
+    ['현재 CM/개',...SKU.map(s=>fmt(s.cmU)+'원'),'—'],
+    ['인하 후 CM/개',...c.det.map(d=>`<span class="${curD?'red':''}">${fmt(d.cmU)}원</span>`),'—'],
+    ['예상 수량 (+'+curV+'%)',...c.det.map(d=>d.q+'개'),c.tQ+'개'],
+    ['예상 거래액',...c.det.map(d=>fmtM(d.r)),fmtM(c.tR)],
+    ['예상 CM',...c.det.map(d=>`<span class="${cmChg<0?'amber':'green'}">${fmt(Math.round(d.cm))}</span>`),`<span class="${cmChg<0?'amber':'green'} bold">${fmt(c.tC)}</span>`],
+    ['순 CM 변동','','','','',`<span class="${cmChg>=0?'green':'red'} bold">${cmChg>=0?'+':''}${fmt(cmChg)}</span>`],
+    ['BEP 수량증가율','','','','',curD?`<span class="blue">${be.toFixed(1)}%</span>`:'—']
   ];
-  tb.innerHTML=rows.map((r,i)=>`<tr ${i>=5?'style="background:#f8fafc;"':''}><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+  tb.innerHTML=rows.map((r,i)=>`<tr ${i>=6?'style="background:#f8fafc;"':''}>${r.map((v,j)=>`<td>${v}</td>`).join('')}</tr>`).join('');
 
   const ds=[0,500,1000,1500,2000,2500,3000];
   const base=calc(0,0);
   if(simC)simC.destroy();
-  const chartData=ds.map(d=>{const s=d===0?base:calc(d,curV);return{addRev:s.nRev-base.nRev,nCM:s.nCM};});
+  const cd=ds.map(d=>{const s=d===0?base:calc(d,curV);return{addRev:s.tR-base.tR,nCM:s.tC};});
   simC=new Chart(document.getElementById('c5sim'),{type:'bar',data:{labels:ds.map(d=>d===0?'현행':'−'+fmt(d)),datasets:[
-    {label:'추가 확보 매출',data:chartData.map(x=>x.addRev),backgroundColor:ds.map(d=>d===curD?'#22c55e':'#bbf7d0'),borderRadius:3,yAxisID:'y'},
-    {label:'순 CM',data:chartData.map(x=>x.nCM),type:'line',borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:ds.map(d=>d===curD?'#ef4444':'#fca5a5'),yAxisID:'y1'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},title:{display:true,text:`인하폭별 추가 매출 vs CM (현행 기준, 인하 시 수량 +${curV}%)`,font:{size:12}}},scales:{y:{position:'left',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'},title:{display:true,text:'추가 매출',font:{size:10}}},y1:{position:'right',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{display:false},title:{display:true,text:'순 CM',font:{size:10}}},x:{grid:{display:false}}}}});
+    {label:'추가 확보 매출',data:cd.map(x=>x.addRev),backgroundColor:ds.map(d=>d===curD?'#22c55e':'#bbf7d0'),borderRadius:3,yAxisID:'y'},
+    {label:'순 CM',data:cd.map(x=>x.nCM),type:'line',borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:ds.map(d=>d===curD?'#ef4444':'#fca5a5'),yAxisID:'y1'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},title:{display:true,text:`인하폭별 추가 매출 vs CM (할인율 반영, 수량 +${curV}%)`,font:{size:12}}},scales:{y:{position:'left',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'#f3f4f6'},title:{display:true,text:'추가 매출',font:{size:10}}},y1:{position:'right',ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{display:false},title:{display:true,text:'순 CM',font:{size:10}}},x:{grid:{display:false}}}}});
 
-  document.getElementById('scenarioVolLabel').textContent=`(가격 인하 시 수량 +${curV}% 가정)`;
+  document.getElementById('scenarioVolLabel').textContent=`(수량 +${curV}% · 할인율 5.6% 반영)`;
   document.querySelector('#scenarioTbl tbody').innerHTML=ds.map(d=>{
-    const isB=d===0,s=isB?base:calc(d,curV);
-    const isCur=d===curD&&d!==0,isBE=!isB&&s.nCM>=base.nCM;
-    const addRev=s.nRev-base.nRev,cmChg=s.nCM-base.nCM;
+    const isB=d===0,s=isB?base:calc(d,curV),bp=bePct(d);
+    const isCur=d===curD&&d!==0,isBE=!isB&&s.tC>=base.tC;
+    const ar=s.tR-base.tR,cc=s.tC-base.tC;
     return `<tr ${isCur?'class="hl"':isBE?'class="breakeven"':''}>
-      <td>${isB?'현행 (기준)':'−'+fmt(d)+'원'}</td><td>${fmt(s.pG)}원</td><td>${fmt(s.pR)}원</td>
-      <td>${fmt(s.tQ)}개${isB?'':' (+'+curV+'%)'}</td><td>${fmtM(s.nRev)}</td>
-      <td>${isB?'—':addRev>=0?'<span class="green">+'+fmtM(addRev)+'</span>':'<span class="red">'+fmtM(addRev)+'</span>'}</td>
-      <td>${fmtM(s.nCM)}</td>
-      <td>${isB?'—':cmChg>=0?'<span class="green">+'+fmt(cmChg)+'</span>':'<span class="red">'+fmt(cmChg)+'</span>'}</td>
-      <td>${isB?'—':base.nCM>0?(s.nCM/base.nCM*100).toFixed(0)+'%':'—'}</td></tr>`;
+      <td>${isB?'현행 (기준)':'−'+fmt(d)+'원'}</td>
+      <td>${fmt(s.tQ)}개${isB?'':' (+'+curV+'%)'}</td><td>${fmtM(s.tR)}</td>
+      <td>${isB?'—':ar>=0?'<span class="green">+'+fmtM(ar)+'</span>':'<span class="red">'+fmtM(ar)+'</span>'}</td>
+      <td>${fmtM(s.tC)}</td>
+      <td>${isB?'—':cc>=0?'<span class="green">+'+fmt(cc)+'</span>':'<span class="red">'+fmt(cc)+'</span>'}</td>
+      <td>${isB?'—':base.tC>0?(s.tC/base.tC*100).toFixed(0)+'%':'—'}</td>
+      <td>${isB?'—':'<span class="blue">'+bp.toFixed(1)+'%</span>'}</td></tr>`;
   }).join('');
 
-  const beps=ds.filter(d=>d>0).map(d=>({d,be:calc(d,0).bePct}));
+  const beps=ds.filter(d=>d>0).map(d=>({d,be:bePct(d)}));
   if(beC)beC.destroy();
   beC=new Chart(document.getElementById('c5be'),{type:'bar',data:{labels:beps.map(x=>'−'+fmt(x.d)),datasets:[
     {label:'손익분기 수량증가율',data:beps.map(x=>x.be),backgroundColor:beps.map(x=>x.be<=curV?'#86efac':x.d===curD?'#fbbf24':'#fde68a'),borderRadius:3},
@@ -390,10 +393,10 @@ function render(){
 
   const ins=document.getElementById('simInsight');
   if(curD===0){ins.innerHTML='인하 폭을 선택하여 시뮬레이션하세요.';return;}
-  const v=c.cmChg>=0
-    ?`<strong style="color:#16a34a;">CM 유지 가능:</strong> +${curV}% 수량 증가 시 CM +${fmt(c.cmChg)}원. 추가 매출 +${fmtM(c.addRev)}도 확보.`
-    :`<strong>CM 적자 구간:</strong> +${curV}%로는 CM ${fmt(c.cmChg)}원 부족. 손익분기 최소 <strong>+${c.bePct.toFixed(1)}%</strong> 필요.`;
-  ins.innerHTML=`<strong>−${fmt(curD)}원 인하 + 수량 +${curV}%:</strong> 추가 매출 <strong>${c.addRev>=0?'+':''}${fmtM(c.addRev)}</strong>, 순 CM <strong>${c.cmChg>=0?'+':''}${fmt(c.cmChg)}</strong>. ${v} 스스 N배송 비중 95%+ → 카니발 리스크는 제한적 (Section 3 참조).`;
+  const vt=cmChg>=0
+    ?`<strong style="color:#16a34a;">CM 유지 가능:</strong> +${curV}% 수량 증가 시 CM +${fmt(cmChg)}원. 추가 매출 +${fmtM(addRev)}도 확보.`
+    :`<strong>CM 적자 구간:</strong> +${curV}%로는 CM ${fmt(cmChg)}원 부족. 손익분기 최소 <strong>+${be.toFixed(1)}%</strong> 필요.`;
+  ins.innerHTML=`<strong>−${fmt(curD)}원 인하 + 수량 +${curV}% (할인율 5.6% 반영):</strong> 추가 매출 <strong>${addRev>=0?'+':''}${fmtM(addRev)}</strong>, 순 CM <strong>${cmChg>=0?'+':''}${fmt(cmChg)}</strong>. ${vt} 스스 N배송 비중 95%+ → 카니발 리스크는 제한적.`;
 }
 
 document.querySelectorAll('.sim-btn').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('.sim-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active');curD=parseInt(this.dataset.d);render();}));
