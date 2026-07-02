@@ -21,7 +21,7 @@
   table{width:100%;border-collapse:collapse;font-size:12.5px;}
   thead th{text-align:right;padding:8px 10px;font-weight:600;color:var(--sub);font-size:11px;border-bottom:2px solid var(--border);white-space:nowrap;}
   thead th:first-child{text-align:left;}
-  tbody td{text-align:right;padding:8px 10px;border-bottom:1px solid #f3f4f6;}
+  tbody td{text-align:right;padding:8px 10px;border-bottom:1px solid #f3f4f6;white-space:nowrap;}
   tbody td:first-child{text-align:left;font-weight:600;color:#374151;}
   .red{color:var(--red);font-weight:700;}.blue{color:var(--accent);font-weight:700;}.green{color:var(--green);font-weight:700;}.amber{color:var(--amber);font-weight:700;}.bold{font-weight:700;}
   .ctrl-group{margin-bottom:16px;}
@@ -245,6 +245,7 @@
     <div class="chart-box" style="height:220px;"><canvas id="c5be"></canvas></div>
   </div>
   <div class="insight" id="simInsight"></div>
+  <div class="evidence" id="simConclusion"></div>
 </div>
 
 <div class="footer">바잇미 자사몰 · 보솜패드 가격 시뮬레이션 · 2026-07-02 · 할인율 반영 4-SKU 기준</div>
@@ -397,6 +398,37 @@ function render(){
     ?`<strong style="color:#16a34a;">CM 유지 가능:</strong> +${curV}% 수량 증가 시 CM +${fmt(cmChg)}원. 추가 매출 +${fmtM(addRev)}도 확보.`
     :`<strong>CM 적자 구간:</strong> +${curV}%로는 CM ${fmt(cmChg)}원 부족. 손익분기 최소 <strong>+${be.toFixed(1)}%</strong> 필요.`;
   ins.innerHTML=`<strong>−${fmt(curD)}원 인하 + 수량 +${curV}% (할인율 5.6% 반영):</strong> 추가 매출 <strong>${addRev>=0?'+':''}${fmtM(addRev)}</strong>, 순 CM <strong>${cmChg>=0?'+':''}${fmt(cmChg)}</strong>. ${vt} 스스 N배송 비중 95%+ → 카니발 리스크는 제한적.`;
+
+  const con=document.getElementById('simConclusion');
+  const ds2=[500,1000,1500,2000,2500,3000];
+  const scenarios=ds2.map(d=>{const s=calc(d,curV),b=bePct(d),ar=s.tR-Math.round(B.rev),cc=s.tC-Math.round(B.cm);return{d,tR:s.tR,tC:s.tC,ar,cc,be:b,cmR:Math.round(B.cm)>0?(s.tC/B.cm*100):0};});
+  const cmPos=scenarios.filter(s=>s.cc>=0);
+  let best,label;
+  if(cmPos.length>0){
+    best=cmPos.reduce((a,b)=>a.ar>b.ar?a:b);
+    label='CM 유지하면서 매출 극대화';
+  } else {
+    best=scenarios.reduce((a,b)=>(a.ar/Math.max(1,Math.abs(a.cc)))>(b.ar/Math.max(1,Math.abs(b.cc)))?a:b);
+    label='매출 대비 CM 손실 최소화';
+  }
+  const bestSafe=scenarios.find(s=>s.be<=curV);
+  let html=`<strong>📊 추천 결론 (수량 +${curV}% 가정)</strong><br>`;
+  if(cmPos.length>0){
+    html+=`<strong style="color:#16a34a;">✅ 최적: −${fmt(best.d)}원 인하</strong> → 추가 매출 <strong>+${fmtM(best.ar)}</strong>, CM <strong>+${fmt(best.cc)}</strong> (${best.cmR.toFixed(0)}% 유지). ${label}.<br>`;
+    if(cmPos.length>1){
+      const alt=cmPos.filter(s=>s.d!==best.d).reduce((a,b)=>a.ar>b.ar?a:b);
+      html+=`차선: −${fmt(alt.d)}원 (추가 매출 +${fmtM(alt.ar)}, CM +${fmt(alt.cc)}).<br>`;
+    }
+  } else {
+    html+=`현재 +${curV}% 수량 증가로는 CM 유지 구간이 없습니다. `;
+    if(bestSafe){
+      html+=`<strong style="color:#16a34a;">✅ 안전 추천: −${fmt(bestSafe.d)}원</strong> (BEP ${bestSafe.be.toFixed(1)}% ≤ +${curV}%). 추가 매출 +${fmtM(bestSafe.ar)}, CM 손실 ${fmt(Math.abs(bestSafe.cc))}.<br>`;
+    }
+    html+=`<strong>⚖️ 효율 추천: −${fmt(best.d)}원</strong> → 매출 +${fmtM(best.ar)} 확보 대비 CM 손실 ${fmt(Math.abs(best.cc))}으로 효율 최고. CM유지율 ${best.cmR.toFixed(0)}%.<br>`;
+  }
+  const minBE=scenarios.reduce((a,b)=>a.be<b.be?a:b);
+  html+=`<span style="font-size:11.5px;color:#6b7280;">BEP가 가장 낮은 인하폭: −${fmt(minBE.d)}원 (${minBE.be.toFixed(1)}%). 수량 +${curV}% 기준 ${minBE.be<=curV?'<strong class="green">달성 가능</strong>':'달성 불가 → 볼륨 목표 상향 필요'}.</span>`;
+  con.innerHTML=html;
 }
 
 document.querySelectorAll('.sim-btn').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('.sim-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active');curD=parseInt(this.dataset.d);render();}));
